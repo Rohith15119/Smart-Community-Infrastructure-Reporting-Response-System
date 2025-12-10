@@ -13,7 +13,7 @@ Track complaint status in real-time
 
 User dashboard to view all submitted reports
 
-🛠️ Admin Module
+### 🛠️ Admin Module
 
 Admin login with JWT authentication
 
@@ -21,7 +21,7 @@ View, verify, and update complaint statuses
 
 Manage citizen reports and overall system data
 
-🔒 Security
+### 🔒 Security
 
 Passwords encrypted using bcryptjs
 
