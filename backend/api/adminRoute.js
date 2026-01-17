@@ -3,7 +3,6 @@ import jwt from "jsonwebtoken";
 const { sign } = jwt;
 import { AdminModel } from "../schema/adminSchema.js";
 import { hash, compare } from "bcryptjs";
-import { verifyToken } from "../middleware/verifyToken.js";
 import { citizenModel } from "../schema/citizenSchema.js";
 
 export const adminRoute = express.Router();
@@ -12,7 +11,6 @@ export const adminRoute = express.Router();
 
 adminRoute.patch(
   "/complaint/:parentId/:complaintId/status",
-  // verifyToken,
   async (req, res) => {
     try {
       const { parentId, complaintId } = req.params;
