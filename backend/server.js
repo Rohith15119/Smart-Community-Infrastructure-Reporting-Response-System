@@ -23,7 +23,7 @@ app.use("/city-api/admin", adminRoute); //admin related operations like assignin
 async function ConnectDB() {
   try {
     //connection to database.
-    await connect("mongodb://localhost:27017/SmartCommunity");
+    await connect("mongodb+srv://rohith123:rohith123@cluster1.a2ei2ew.mongodb.net/?appName=Cluster1");
     console.log("Connection Success ✅");
     app.listen(port, () => {
       console.log("Server Activated Upon Port Number : ", port);
