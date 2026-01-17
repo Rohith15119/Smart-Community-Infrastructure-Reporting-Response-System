@@ -1,0 +1,155 @@
+/* Report.css */
+
+/* Page wrapper */
+.report-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 48px 20px;
+  background: #f6f7fb;
+  font-family: Arial, sans-serif;
+  color: #222;
+}
+
+/* Card container */
+.report-card {
+  width: 100%;
+  max-width: 720px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+  padding: 28px 30px;
+  box-sizing: border-box;
+}
+
+/* Title */
+.report-card h2 {
+  margin: 0 0 12px 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: #111827;
+}
+
+/* Small helper text */
+.report-card p.helper {
+  margin: 4px 0 14px 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* Form layout */
+.report-form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+/* Labels */
+.report-form label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+/* Inputs / select / textarea */
+.report-form input[type="text"],
+.report-form select,
+.report-form textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #e6e9ef;
+  font-size: 15px;
+  outline: none;
+  box-sizing: border-box;
+  transition: box-shadow 0.18s, border-color 0.18s;
+  background: #fff;
+  color: #111827;
+}
+
+.report-form input[type="text"]:focus,
+.report-form select:focus,
+.report-form textarea:focus {
+  border-color: #0b74ff;
+  box-shadow: 0 4px 14px rgba(11, 116, 255, 0.08);
+}
+
+/* Textarea */
+.report-form textarea {
+  resize: vertical;
+  min-height: 120px;
+  line-height: 1.4;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+/* Button row */
+.report-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 6px;
+}
+
+/* Button */
+.report-form button {
+  padding: 11px 18px;
+  border-radius: 8px;
+  border: none;
+  background: #0b74ff;
+  color: #fff;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: transform 0.12s ease, background 0.18s;
+}
+
+.report-form button:disabled {
+  background: #9fc1ff;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.report-form button:not(:disabled):hover {
+  transform: translateY(-2px);
+  background: #055fcc;
+}
+
+/* Message */
+.form-message {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.form-message.success {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #bbf7d0;
+}
+
+.form-message.error {
+  background: #fff1f2;
+  color: #9f1239;
+  border: 1px solid #fecaca;
+}
+
+/* Disabled overlay hint when not logged */
+.locked-overlay {
+  opacity: 0.95;
+}
+
+/* Responsive tweaks */
+@media (max-width: 520px) {
+  .report-card {
+    padding: 20px;
+    border-radius: 10px;
+  }
+
+  .report-card h2 {
+    font-size: 20px;
+  }
+}
