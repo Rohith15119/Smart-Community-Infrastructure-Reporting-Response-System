@@ -4,7 +4,6 @@ const { sign } = jwt;
 import { citizenModel } from "../schema/citizenSchema.js";
 import { AdminModel } from "../schema/adminSchema.js";
 import { hash, compare } from "bcryptjs";
-import { verifyToken } from "../middleware/verifyToken.js";
 export const cityRoute = express.Router();
 
 cityRoute.use(express.json());
