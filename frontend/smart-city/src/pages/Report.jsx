@@ -3,8 +3,9 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./Report.css";
 import Swal from "sweetalert2";
+import { API_BASE } from "../config";
 
-const api = axios.create({ baseURL: "http://localhost:5004/city-api" });
+const api = axios.create({ baseURL: `${API_BASE}/city-api` });
 
 const looksLikeObjectId = (s) =>
   typeof s === "string" && /^[a-fA-F0-9]{24}$/.test(s);

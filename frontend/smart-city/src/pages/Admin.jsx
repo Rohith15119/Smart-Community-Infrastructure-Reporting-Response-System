@@ -1,9 +1,10 @@
 // Admin.jsx
 import React, { useEffect, useState } from "react";
 import "./Track.css";
+import { API_BASE } from "../config";
 
-const API_BASE1 = "http://localhost:5004/city-api/citizen";
-const API_BASE2 = "http://localhost:5004/city-api/admin";
+const API_BASE1 = `${API_BASE}/city-api/citizen`;
+const API_BASE2 = `${API_BASE}/city-api/admin`;
 
 export default function Admin() {
   const [complaints, setComplaints] = useState([]);

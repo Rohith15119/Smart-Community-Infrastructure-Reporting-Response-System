@@ -2,8 +2,9 @@
 import React, { useEffect, useState } from "react";
 import "./Track.css";
 import Swal from "sweetalert2";
+import { API_BASE } from "../config";
 
-const API_BASE = "http://localhost:5004/city-api/citizen";
+const API_BASE_CITIZEN = `${API_BASE}/city-api/citizen`;
 
 export default function Track() {
   const [complaints, setComplaints] = useState([]);
@@ -31,7 +32,7 @@ export default function Track() {
       try {
         const obj = JSON.parse(localStorage.getItem("user"));
 
-        const res = await fetch(`${API_BASE}/track/${obj.user.username}`, {
+        const res = await fetch(`${API_BASE_CITIZEN}/track/${obj.user.username}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -122,7 +123,7 @@ export default function Track() {
 
     try {
       const res = await fetch(
-        `${API_BASE}/complaint/${parentId}/${complaintId}`,
+        `${API_BASE_CITIZEN}/complaint/${parentId}/${complaintId}`,
         {
           method: "DELETE",
           credentials: "include",
@@ -157,7 +158,7 @@ export default function Track() {
 
     try {
       const res = await fetch(
-        `${API_BASE}/complaint/${parentId}/${complaintId}/status`,
+        `${API_BASE_CITIZEN}/complaint/${parentId}/${complaintId}/status`,
         {
           method: "PATCH",
           credentials: "include",

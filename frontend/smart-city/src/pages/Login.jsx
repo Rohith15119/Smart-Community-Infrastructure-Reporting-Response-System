@@ -4,9 +4,10 @@ import { useNavigate } from "react-router-dom";
 import "./Login.css";
 import { useAuth } from "../auth/AuthContext"; // NEW (kept)
 import axios from "axios";
+import { API_BASE } from "../config";
 
-const API_BASE = "http://localhost:5004/city-api/citizen";
-const api = axios.create({ baseURL: API_BASE, withCredentials: true });
+const API_BASE_CITIZEN = `${API_BASE}/city-api/citizen`;
+const api = axios.create({ baseURL: API_BASE_CITIZEN, withCredentials: true });
 
 const Login = () => {
   const [emailOrUsername, setEmailOrUsername] = useState("");

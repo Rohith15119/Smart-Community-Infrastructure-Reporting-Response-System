@@ -3,9 +3,8 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { API_BASE } from "../config";
 
-// Set your backend base URL here
-const API_BASE = "http://localhost:5004";
 const REGISTER_PATH = "/city-api/citizen/register"; // change if your route differs
 
 export default function Register() {

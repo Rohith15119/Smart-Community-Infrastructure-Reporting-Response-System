@@ -1,6 +1,7 @@
 // src/auth/AuthContext.jsx
 import React, { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
+import { API_BASE } from "../config";
 
 /**
  * AuthContext responsibilities:
@@ -12,7 +13,7 @@ import axios from "axios";
 const AUTH_KEY = "user"; // keep same key you already used for compatibility
 
 const api = axios.create({
-  baseURL: "http://localhost:5004/city-api",
+  baseURL: `${API_BASE}/city-api`,
   withCredentials: true, // if your server uses cookies
 });
 

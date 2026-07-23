@@ -1,8 +1,9 @@
 // Track.jsx
 import React, { useEffect, useState } from "react";
 import "./Track.css";
+import { API_BASE } from "../config";
 
-const API_BASE = "http://localhost:5004/city-api/citizen";
+const API_BASE_CITIZEN = `${API_BASE}/city-api/citizen`;
 
 export default function All_Reports() {
   const [complaints, setComplaints] = useState([]);
@@ -18,7 +19,7 @@ export default function All_Reports() {
 
       try {
         // IMPORTANT: send cookies so server can read req.cookies.token
-        const res = await fetch(`${API_BASE}/track`, {
+        const res = await fetch(`${API_BASE_CITIZEN}/track`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
