@@ -10,18 +10,18 @@ const API_BASE_CITIZEN = `${API_BASE}/city-api/citizen`;
 const api = axios.create({ baseURL: API_BASE_CITIZEN, withCredentials: true });
 
 const Login = ({ isAdmin: isAdminProp }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { login } = useAuth();
+
+  // State to track whether Citizen Login or Admin Login tab is active
+  const [isAdminMode, setIsAdminMode] = useState(
+    isAdminProp || location.pathname === "/admin-login"
+  );
   const [emailOrUsername, setEmailOrUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { login } = useAuth();
-
-  // Check if current route is admin login
-  const isAdminMode = isAdminProp || location.pathname === "/admin-login";
-  const roleChoice = isAdminMode ? "admin" : "citizen";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -50,7 +50,9 @@ const Login = ({ isAdmin: isAdminProp }) => {
             returned.email ||
             returned.name ||
             emailOrUsername,
-          role: (returned.role || roleChoice).toString().toLowerCase(),
+          role: (returned.role || (isAdminMode ? "admin" : "citizen"))
+            .toString()
+            .toLowerCase(),
         };
 
         try {
@@ -92,15 +94,43 @@ const Login = ({ isAdmin: isAdminProp }) => {
   return (
     <div className="login-page">
       <div className="login-card">
-        <h2>{isAdminMode ? "🛡️ Admin Login" : "Citizen Login"}</h2>
+        {/* Separate Login Buttons / Tabs */}
+        <div className="login-tabs">
+          <button
+            type="button"
+            className={`login-tab-btn ${!isAdminMode ? "active" : ""}`}
+            onClick={() => {
+              setIsAdminMode(false);
+              setError(null);
+            }}
+          >
+            Citizen Login
+          </button>
+          <button
+            type="button"
+            className={`login-tab-btn ${isAdminMode ? "active" : ""}`}
+            onClick={() => {
+              setIsAdminMode(true);
+              setError(null);
+            }}
+          >
+            🛡️ Admin Login
+          </button>
+        </div>
+
+        <h2>{isAdminMode ? "🛡️ Admin Portal Login" : "Citizen Login"}</h2>
+
         {error && <p className="error-text">{error}</p>}
+
         <form onSubmit={handleSubmit}>
           <div>
             <label>Username</label>
             <input
               value={emailOrUsername}
               onChange={(e) => setEmailOrUsername(e.target.value)}
-              placeholder={isAdminMode ? "Enter admin username" : "Enter username"}
+              placeholder={
+                isAdminMode ? "Enter admin username" : "Enter username"
+              }
               required
             />
           </div>
