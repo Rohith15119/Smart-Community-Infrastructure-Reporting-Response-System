@@ -16,14 +16,6 @@ export default function Navbar() {
     }
   });
 
-  const [authInProgress, setAuthInProgress] = useState(() => {
-    try {
-      return localStorage.getItem("auth_in_progress") === "1";
-    } catch {
-      return false;
-    }
-  });
-
   const [logoOk, setLogoOk] = useState(true);
 
   const username = user?.username || user?.name || user?.email || "";
@@ -51,16 +43,10 @@ export default function Navbar() {
       } catch {
         setUser(null);
       }
-
-      try {
-        setAuthInProgress(localStorage.getItem("auth_in_progress") === "1");
-      } catch {
-        setAuthInProgress(false);
-      }
     };
 
     const onStorage = (e) => {
-      if (e.key === "user" || e.key === "auth_in_progress" || e.key === null) {
+      if (e.key === "user" || e.key === null) {
         refreshFromStorage();
       }
     };
@@ -107,74 +93,76 @@ export default function Navbar() {
               <span className="brand-initial">C</span>
             </div>
           )}
-          <span className="brand-text">CityPortal</span>
+          <div className="brand-titles">
+            <span className="brand-text">CityPortal</span>
+            <span className="brand-subtext">Smart Infrastructure</span>
+          </div>
         </Link>
 
         {/* Center Navigation Links */}
         <nav className="nav-links" aria-label="Main navigation">
           <Link to="/" className={getLinkClass("/")}>
-            Home
+            <span className="nav-icon">🏠</span> Home
           </Link>
 
-          {!authInProgress && (
+          {/* Links for Logged-In Citizens */}
+          {user && role !== "admin" && (
             <>
-              {role !== "admin" && user !== null && (
-                <>
-                  <Link to="/report" className={getLinkClass("/report")}>
-                    Report Issue
-                  </Link>
-                  <Link to="/track" className={getLinkClass("/track")}>
-                    Track
-                  </Link>
-                </>
-              )}
-
-              {role === "admin" && user !== null && (
-                <Link to="/admin" className={`${getLinkClass("/admin")} admin`}>
-                  Admin Panel
-                </Link>
-              )}
-
-              <Link to="/all-reports" className={getLinkClass("/all-reports")}>
-                Community Dashboard
+              <Link to="/report" className={getLinkClass("/report")}>
+                <span className="nav-icon">🚨</span> Report Issue
+              </Link>
+              <Link to="/track" className={getLinkClass("/track")}>
+                <span className="nav-icon">📍</span> Track Complaints
               </Link>
             </>
           )}
+
+          {/* Links for Logged-In Admin */}
+          {user && role === "admin" && (
+            <Link to="/admin" className={`${getLinkClass("/admin")} admin-link`}>
+              <span className="nav-icon">🛡️</span> Admin Panel
+            </Link>
+          )}
+
+          {/* Community Dashboard link - ALWAYS visible to everyone */}
+          <Link to="/all-reports" className={getLinkClass("/all-reports")}>
+            <span className="nav-icon">📊</span> Community Dashboard
+          </Link>
         </nav>
 
         {/* Right Actions */}
         <div className="nav-actions">
           {!user ? (
-            authInProgress ? (
-              <button className="btn primary" disabled>
-                Logging in...
-              </button>
-            ) : (
-              <div className="auth-buttons">
-                <Link to="/login" className={`btn ${pathname === "/login" ? "primary" : "ghost"}`}>
-                  Login
-                </Link>
-                <Link to="/register" className={`btn ${pathname === "/register" ? "primary" : "ghost"}`}>
-                  Register
-                </Link>
-              </div>
-            )
+            <div className="auth-buttons">
+              <Link
+                to="/login"
+                className={`btn btn-login ${pathname === "/login" ? "active" : ""}`}
+              >
+                Login
+              </Link>
+              <Link
+                to="/register"
+                className={`btn btn-register ${pathname === "/register" ? "active" : ""}`}
+              >
+                Register
+              </Link>
+            </div>
           ) : (
-            <>
+            <div className="user-session">
               <div className="user-chip" title={username || "User"}>
                 <span className="avatar">
                   {(username || "U").charAt(0).toUpperCase()}
                 </span>
                 <div className="user-info">
                   <div className="user-name">{username || "User"}</div>
-                  <div className="user-role">{role || "citizen"}</div>
+                  <div className="user-role-badge">{role || "citizen"}</div>
                 </div>
               </div>
 
-              <button className="btn ghost" onClick={handleLogout}>
+              <button className="btn btn-logout" onClick={handleLogout}>
                 Logout
               </button>
-            </>
+            </div>
           )}
         </div>
       </div>
