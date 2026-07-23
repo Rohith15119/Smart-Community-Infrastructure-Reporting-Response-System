@@ -175,23 +175,22 @@ export default function Navbar() {
               )}
 
               {role === "admin" && user !== null && (
-                <>
-                  <Link
-                    to="/admin"
-                    className="nav-link admin"
-                    style={{ color: "black" }}
-                  >
-                    Admin Dashboard
-                  </Link>
-                  <Link
-                    to="/all-reports"
-                    className="nav-link admin"
-                    style={{ color: "black" }}
-                  >
-                    All Reports
-                  </Link>
-                </>
+                <Link
+                  to="/admin"
+                  className="nav-link admin"
+                  style={{ color: "black" }}
+                >
+                  Admin Dashboard
+                </Link>
               )}
+
+              <Link
+                to="/all-reports"
+                className="nav-link"
+                style={{ color: "black" }}
+              >
+                Community Dashboard
+              </Link>
             </>
           )}
         </nav>
