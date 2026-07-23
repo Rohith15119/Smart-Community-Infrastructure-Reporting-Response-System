@@ -1,6 +1,7 @@
 // Admin.jsx
 import React, { useEffect, useState } from "react";
 import "./Track.css";
+import Swal from "sweetalert2";
 import { API_BASE } from "../config";
 
 const API_BASE1 = `${API_BASE}/city-api/citizen`;
@@ -12,10 +13,18 @@ export default function Admin() {
   const [error, setError] = useState(null);
   const [message, setMessage] = useState(null);
 
-  // read user from localStorage once
+  // Read user from localStorage
   const rawUser = localStorage.getItem("user");
-  const currentUser = rawUser ? JSON.parse(rawUser).user : null;
-  const currentRole = currentUser?.role || null;
+  let currentUser = null;
+  if (rawUser) {
+    try {
+      const parsed = JSON.parse(rawUser);
+      currentUser = parsed.user || parsed;
+    } catch (e) {
+      currentUser = null;
+    }
+  }
+  const currentRole = (currentUser?.role || "").toLowerCase();
   const isAdmin = currentRole === "admin";
 
   useEffect(() => {
@@ -55,7 +64,6 @@ export default function Admin() {
 
         const data = await res.json();
 
-        // normalize: data may be { items: [...] } or an array
         const citizens = Array.isArray(data)
           ? data
           : Array.isArray(data.items)
@@ -71,8 +79,8 @@ export default function Admin() {
             _parentId: citizen._id || citizen.id || null,
             _parentUsername: username,
             reportedAt: c.createdAt || createdAtCitizen || null,
-            status: c.status || "pending",
-            feedback: c.feedback || "", // new field
+            status: (c.status || "pending").toLowerCase(),
+            feedback: c.feedback || "",
           }));
         });
 
@@ -94,12 +102,17 @@ export default function Admin() {
     loadComplaints();
   }, []);
 
-  // generic helper for admin to update complaint status + optional feedback
-  async function updateComplaintStatus(parentId, complaintId, newStatus) {
+  // Update complaint status + feedback
+  async function updateComplaintStatus(parentId, complaintId, newStatus, feedback = "") {
     const prev = complaints;
 
+    // Optimistic UI update
     setComplaints((arr) =>
-      arr.map((c) => (c._id === complaintId ? { ...c, status: newStatus } : c))
+      arr.map((c) =>
+        c._id === complaintId
+          ? { ...c, status: newStatus, feedback: newStatus === "rejected" ? feedback : c.feedback }
+          : c
+      )
     );
 
     try {
@@ -109,7 +122,7 @@ export default function Admin() {
           method: "PATCH",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status: newStatus }),
+          body: JSON.stringify({ status: newStatus, feedback }),
         }
       );
 
@@ -123,26 +136,62 @@ export default function Admin() {
     } catch (err) {
       console.error("Status change failed:", err);
       setError(err.message || "Failed to update status");
-      setComplaints(prev); // rollback
+      setComplaints(prev); // Rollback on error
     }
   }
 
-  // admin: mark complaint as completed / resolved
+  // Admin action: Mark as Completed / Resolved
   function handleMarkCompleted(parentId, complaintId) {
-    updateComplaintStatus(parentId, complaintId, "resolved");
+    updateComplaintStatus(parentId, complaintId, "resolved", "");
   }
 
-  // admin: reject complaint with feedback (required)
-  function handleReject(parentId, complaintId) {
-    updateComplaintStatus(parentId, complaintId, "rejected");
+  // Admin action: Reject complaint with required reason
+  async function handleReject(parentId, complaintId) {
+    const { value: reason, isConfirmed } = await Swal.fire({
+      title: "Reason for Rejection",
+      input: "textarea",
+      inputPlaceholder: "Please enter the reason for rejecting this complaint...",
+      inputValidator: (value) => {
+        if (!value || !value.trim()) {
+          return "You must provide a rejection reason!";
+        }
+      },
+      showCancelButton: true,
+      confirmButtonText: "Submit Rejection",
+      confirmButtonColor: "#ef4444",
+      cancelButtonText: "Cancel",
+    });
+
+    if (isConfirmed && reason) {
+      updateComplaintStatus(parentId, complaintId, "rejected", reason.trim());
+    }
   }
+
+  // Render status badge helper
+  const renderStatusPill = (status) => {
+    let label = "Pending";
+    let className = "status-pill status-pending";
+
+    if (status === "resolved" || status === "completed") {
+      label = "Solved ✅";
+      className = "status-pill status-resolved";
+    } else if (status === "rejected") {
+      label = "Rejected ❌";
+      className = "status-pill status-rejected";
+    } else if (status === "in-progress") {
+      label = "In Progress ⚙️";
+      className = "status-pill status-in-progress";
+    }
+
+    return <span className={className}>{label}</span>;
+  };
 
   if (!isAdmin) {
     return (
       <div className="track-wrap">
-        <div className="track-header">Complaints</div>
+        <div className="track-header">Admin Control Panel</div>
         <div className="track-error">
-          You are not authorized to access admin panel.
+          You are not authorized to access the admin panel. Please log in as an administrator.
         </div>
       </div>
     );
@@ -151,7 +200,7 @@ export default function Admin() {
   if (loading) {
     return (
       <div className="track-wrap">
-        <div className="track-header">Complaints</div>
+        <div className="track-header">Admin Control Panel</div>
         <div className="track-message">Loading complaints…</div>
       </div>
     );
@@ -160,7 +209,7 @@ export default function Admin() {
   if (error) {
     return (
       <div className="track-wrap">
-        <div className="track-header">Complaints</div>
+        <div className="track-header">Admin Control Panel</div>
         <div className="track-error">{error}</div>
       </div>
     );
@@ -169,7 +218,7 @@ export default function Admin() {
   if (message) {
     return (
       <div className="track-wrap">
-        <div className="track-header">Complaints</div>
+        <div className="track-header">Admin Control Panel</div>
         <div className="track-message">{message}</div>
       </div>
     );
@@ -178,7 +227,7 @@ export default function Admin() {
   if (!complaints.length) {
     return (
       <div className="track-wrap">
-        <div className="track-header">Complaints</div>
+        <div className="track-header">Admin Control Panel</div>
         <div className="track-message">No complaints found.</div>
       </div>
     );
@@ -186,78 +235,78 @@ export default function Admin() {
 
   return (
     <div className="track-wrap">
-      <div className="track-header">Complaints</div>
+      <div className="track-header">Admin Control Panel</div>
 
-      <ul className="track-list">
+      <div className="track-grid">
         {complaints.map((c) => {
           const reported = c.reportedAt
             ? new Date(c.reportedAt).toLocaleString()
             : "Unknown";
 
           const status = c.status || "pending";
+          const isCompleted = status === "resolved" || status === "completed";
+          const isRejected = status === "rejected";
 
           return (
-            <li
-              className="complaint-item"
+            <article
+              className="complaint-card"
               key={c._id || `${c._parentId}-${c.location}-${reported}`}
             >
-              <div className="item-body">
-                <div className="row">
-                  <strong className="loc">{c.location || "—"}</strong>
-                  <span className="cat">{c.category || "—"}</span>
+              <div className="complaint-row">
+                <h3 className="complaint-location">{c.location || "—"}</h3>
+                <span className="complaint-category">{c.category || "—"}</span>
+              </div>
+
+              <p className="complaint-description">
+                {c.description || "No description provided."}
+              </p>
+
+              <div className="complaint-meta">
+                <div className="meta-item">
+                  <strong>Status:</strong> {renderStatusPill(status)}
                 </div>
 
-                <div className="desc">
-                  {c.description || "No description provided."}
+                <div className="meta-item">
+                  <strong>Reported:</strong> <span>{reported}</span>
                 </div>
 
-                <div className="meta">
-                  <span>
-                    <strong>Reported:</strong> {reported}
-                  </span>
-                  <span>
-                    <strong>Status:</strong>{" "}
-                    <span className={`status-pill status-${status}`}>
-                      {status}
-                    </span>
-                  </span>
-                  {c._parentUsername && (
-                    <span>
-                      <strong>User:</strong> {c._parentUsername}
-                    </span>
-                  )}
-                </div>
-
-                {/* show feedback if rejected */}
-                {status === "rejected" && c.feedback && (
-                  <div className="feedback">
-                    <strong>Admin Feedback:</strong> {c.feedback}
+                {c._parentUsername && (
+                  <div className="meta-item">
+                    <strong>User:</strong> <span>{c._parentUsername}</span>
                   </div>
                 )}
-
-                <div className="actions">
-                  {/* Only one type of operation: mark completed or rejected */}
-                  <button
-                    className="btn"
-                    onClick={() => handleMarkCompleted(c._parentId, c._id)}
-                    disabled={status === "resolved"}
-                  >
-                    Mark as Completed
-                  </button>
-
-                  <button
-                    className="btn"
-                    onClick={() => handleReject(c._parentId, c._id)}
-                    disabled={status === "rejected"}
-                  >
-                    Mark as Rejected
-                  </button>
-                </div>
               </div>
-            </li>
+
+              {/* Show Rejection Reason if available */}
+              {isRejected && c.feedback && (
+                <div className="feedback-box">
+                  <strong>Rejection Reason:</strong> {c.feedback}
+                </div>
+              )}
+
+              {/* Admin Action Buttons */}
+              <div className="complaint-actions" style={{ display: "flex", gap: "10px", marginTop: "14px" }}>
+                <button
+                  className="btn btn-success"
+                  onClick={() => handleMarkCompleted(c._parentId, c._id)}
+                  disabled={isCompleted}
+
+                >
+                  {isCompleted ? "Completed ✅" : "Mark as Completed"}
+                </button>
+
+                <button
+                  className="btn btn-danger"
+                  onClick={() => handleReject(c._parentId, c._id)}
+                  disabled={isRejected}
+                >
+                  {isRejected ? "Rejected ❌" : "Mark as Rejected"}
+                </button>
+              </div>
+            </article>
           );
         })}
-      </ul>
+      </div>
     </div>
   );
 }

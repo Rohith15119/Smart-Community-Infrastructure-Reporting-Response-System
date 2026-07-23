@@ -52,6 +52,11 @@ const citizenSchema = new Schema(
           type: String,
           default: "pending",
         },
+
+        feedback: {
+          type: String,
+          default: "",
+        },
       },
     ],
   },

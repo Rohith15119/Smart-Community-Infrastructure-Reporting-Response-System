@@ -29,6 +29,9 @@ adminRoute.patch(
         return res.status(404).json({ message: "Complaint not found" });
 
       complaint.status = message.status;
+      if (message.feedback !== undefined) {
+        complaint.feedback = message.feedback;
+      }
       await citizen.save();
 
       return res.status(200).json({ message: "Status updated", complaint });
