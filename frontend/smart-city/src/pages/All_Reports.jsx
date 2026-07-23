@@ -1,4 +1,4 @@
-// Track.jsx
+// All_Reports.jsx
 import React, { useEffect, useState } from "react";
 import "./Track.css";
 import { API_BASE } from "../config";
@@ -18,35 +18,25 @@ export default function All_Reports() {
       setMessage(null);
 
       try {
-        // IMPORTANT: send cookies so server can read req.cookies.token
         const res = await fetch(`${API_BASE_CITIZEN}/track`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
           },
-          credentials: "include", // <-- sends cookies to server
+          credentials: "include",
         });
 
-        // helpful debug info (open browser console to view)
-        // console.log("track response status:", res.status);
-
-        // handle common auth related statuses
         if (res.status === 401) {
-          // missing token
-          setError("Unauthorized — no token provided. Please login.");
+          setError("Unauthorized — please login.");
           setLoading(false);
           return;
         }
         if (res.status === 403) {
-          // invalid/expired token
-          setError(
-            "Forbidden — invalid or expired session. Please login again."
-          );
+          setError("Forbidden — invalid or expired session.");
           setLoading(false);
           return;
         }
         if (res.status === 202) {
-          // your server returns 202 with message "Empty List !"
           const body = await res.json().catch(() => ({}));
           setMessage(body.message || "No complaints yet.");
           setComplaints([]);
@@ -61,14 +51,13 @@ export default function All_Reports() {
 
         const data = await res.json();
 
-        // The server returns { message: "...", items: [...] }
         const citizens = Array.isArray(data)
           ? data
           : Array.isArray(data.items)
           ? data.items
           : [];
 
-        // flatten complaints across all citizens
+        // Flatten complaints across all citizens and include status
         const flat = citizens.flatMap((citizen) => {
           const createdAtCitizen = citizen.createdAt || null;
           const username = citizen.username || null;
@@ -77,10 +66,11 @@ export default function All_Reports() {
             _parentId: citizen._id || citizen.id || null,
             _parentUsername: username,
             reportedAt: c.createdAt || createdAtCitizen || null,
+            status: (c.status || "pending").toLowerCase(),
           }));
         });
 
-        // optional: sort newest first
+        // Sort newest first
         flat.sort((a, b) => {
           const ta = a.reportedAt ? new Date(a.reportedAt).getTime() : 0;
           const tb = b.reportedAt ? new Date(b.reportedAt).getTime() : 0;
@@ -99,10 +89,29 @@ export default function All_Reports() {
     loadComplaints();
   }, []);
 
+  // Helper to format status text nicely
+  const renderStatusPill = (status) => {
+    let label = "Pending";
+    let className = "status-pill status-pending";
+
+    if (status === "resolved" || status === "completed") {
+      label = "Solved ✅";
+      className = "status-pill status-resolved";
+    } else if (status === "rejected") {
+      label = "Rejected ❌";
+      className = "status-pill status-rejected";
+    } else if (status === "in-progress") {
+      label = "In Progress ⚙️";
+      className = "status-pill status-in-progress";
+    }
+
+    return <span className={className}>{label}</span>;
+  };
+
   if (loading) {
     return (
       <div className="track-wrap">
-        <div className="track-header">Complaints</div>
+        <div className="track-header">Community Complaints</div>
         <div className="track-message">Loading complaints…</div>
       </div>
     );
@@ -111,7 +120,7 @@ export default function All_Reports() {
   if (error) {
     return (
       <div className="track-wrap">
-        <div className="track-header">Complaints</div>
+        <div className="track-header">Community Complaints</div>
         <div className="track-error">{error}</div>
       </div>
     );
@@ -120,7 +129,7 @@ export default function All_Reports() {
   if (message) {
     return (
       <div className="track-wrap">
-        <div className="track-header">Complaints</div>
+        <div className="track-header">Community Complaints</div>
         <div className="track-message">{message}</div>
       </div>
     );
@@ -129,7 +138,7 @@ export default function All_Reports() {
   if (!complaints.length) {
     return (
       <div className="track-wrap">
-        <div className="track-header">Complaints</div>
+        <div className="track-header">Community Complaints</div>
         <div className="track-message">No complaints found.</div>
       </div>
     );
@@ -137,7 +146,7 @@ export default function All_Reports() {
 
   return (
     <div className="track-wrap">
-      <div className="track-header">Complaints</div>
+      <div className="track-header">Community Complaints</div>
 
       <div className="track-grid">
         {complaints.map((c) => {
@@ -161,17 +170,16 @@ export default function All_Reports() {
 
               <div className="complaint-meta">
                 <div className="meta-item">
+                  <strong>Status:</strong> {renderStatusPill(c.status)}
+                </div>
+
+                <div className="meta-item">
                   <strong>Reported:</strong> <span>{reported}</span>
                 </div>
+
                 {c._parentUsername && (
                   <div className="meta-item">
                     <strong>User:</strong> <span>{c._parentUsername}</span>
-                  </div>
-                )}
-                {c._parentId && (
-                  <div className="meta-item">
-                    <strong>Parent ID:</strong>{" "}
-                    <span className="mono">{String(c._parentId)}</span>
                   </div>
                 )}
               </div>
