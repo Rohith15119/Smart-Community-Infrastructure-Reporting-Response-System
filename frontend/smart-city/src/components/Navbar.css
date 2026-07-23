@@ -1,4 +1,4 @@
-/* src/components/Navbar.css - Simple Light Theme */
+/* src/components/Navbar.css - Simple Light Theme with Compact Buttons */
 
 .site-navbar {
   background-color: #ffffff;
@@ -13,7 +13,7 @@
   max-width: 1050px;
   margin: 0 auto;
   padding: 0 20px;
-  height: 62px;
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -92,45 +92,51 @@
   font-weight: 600;
 }
 
-/* Simple Buttons */
-.btn {
+/* Compact Navbar-Specific Buttons (bypasses global App.css .btn height overrides) */
+.nav-btn {
   text-decoration: none;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
-  padding: 8px 16px;
+  padding: 6px 14px !important;
+  height: auto !important;
+  min-height: initial !important;
+  margin: 0 !important;
   border-radius: 6px;
   border: none;
   cursor: pointer;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.4;
 }
 
-.btn-primary {
+.nav-btn-primary {
   background-color: #2563eb;
   color: #ffffff;
 }
 
-.btn-primary:hover {
+.nav-btn-primary:hover {
   background-color: #1d4ed8;
 }
 
-.btn-secondary {
+.nav-btn-secondary {
   background-color: #f1f5f9;
   color: #334155;
   border: 1px solid #cbd5e1;
 }
 
-.btn-secondary:hover {
+.nav-btn-secondary:hover {
   background-color: #e2e8f0;
 }
 
-.btn-logout {
+.nav-btn-logout {
   background-color: #fef2f2;
   color: #dc2626;
   border: 1px solid #fecaca;
-  padding: 6px 12px;
+  padding: 5px 12px !important;
 }
 
-.btn-logout:hover {
+.nav-btn-logout:hover {
   background-color: #fee2e2;
 }
 

@@ -99,10 +99,10 @@ export default function Navbar() {
         <div className="nav-right">
           {!user ? (
             <div className="auth-btns">
-              <Link to="/login" className="btn btn-primary">
+              <Link to="/login" className="nav-btn nav-btn-primary">
                 Login
               </Link>
-              <Link to="/register" className="btn btn-secondary">
+              <Link to="/register" className="nav-btn nav-btn-secondary">
                 Register
               </Link>
             </div>
@@ -111,7 +111,7 @@ export default function Navbar() {
               <span className="user-name">
                 {username} ({role})
               </span>
-              <button onClick={handleLogout} className="btn btn-logout">
+              <button onClick={handleLogout} className="nav-btn nav-btn-logout">
                 Logout
               </button>
             </div>
