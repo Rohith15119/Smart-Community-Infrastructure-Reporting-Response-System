@@ -47,7 +47,19 @@ cityRoute.post("/login", async (req, res) => {
 cityRoute.post("/admin", async (req, res) => {
   let { username, password } = req.body;
 
-  const valid = await AdminModel.findOne({ username: username });
+  let valid = await AdminModel.findOne({ username: username });
+
+  // Auto-seed default admin account if not existing yet
+  if (!valid && username === "admin" && password === "admin123") {
+    try {
+      valid = await AdminModel.create({
+        username: "admin",
+        password: "admin123",
+      });
+    } catch (err) {
+      console.error("Auto admin creation error:", err);
+    }
+  }
 
   if (!valid)
     return res.status(400).json({ message: "Invalid Admin Account Details " });
