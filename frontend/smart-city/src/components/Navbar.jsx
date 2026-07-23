@@ -1,12 +1,11 @@
-// src/components/Navbar.jsx (added conditional for login page)
+// src/components/Navbar.jsx
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom"; // NEW: useLocation added
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import "./Navbar.css";
 
 export default function Navbar() {
   const navigate = useNavigate();
-  const { pathname } = useLocation(); // NEW
-  // const user = localStorage.getItem("user");
+  const { pathname } = useLocation();
 
   const [user, setUser] = useState(() => {
     try {
@@ -87,51 +86,14 @@ export default function Navbar() {
 
   const LOGO_SRC = "/logo192.png";
 
-  // -----------------------------------------------------------
-  // NEW: If on login page → show ONLY Home + Register
-  // -----------------------------------------------------------
-  if (pathname === "/login") {
-    return (
-      <header className="site-navbar">
-        <div className="container nav-inner">
-          <Link to="/" className="brand">
-            {logoOk ? (
-              <img
-                src={LOGO_SRC}
-                alt="CityPortal logo"
-                className="brand-logo"
-                onError={() => setLogoOk(false)}
-              />
-            ) : (
-              <div className="brand-fallback">
-                <span className="brand-initial">C</span>
-              </div>
-            )}
-            <span className="brand-text">CityPortal</span>
-          </Link>
-
-          <nav className="nav-links">
-            <Link to="/" className="nav-link" style={{ color: "black" }}>
-              Home
-            </Link>
-            <Link
-              to="/register"
-              className="nav-link"
-              style={{ color: "black" }}
-            >
-              Register
-            </Link>
-          </nav>
-        </div>
-      </header>
-    );
-  }
-
-  // -----------------------------------------------------------
+  const getLinkClass = (path) => {
+    return pathname === path ? "nav-link active" : "nav-link";
+  };
 
   return (
     <header className="site-navbar">
       <div className="container nav-inner">
+        {/* Brand Logo */}
         <Link to="/" className="brand" aria-label="CityPortal home">
           {logoOk ? (
             <img
@@ -148,8 +110,9 @@ export default function Navbar() {
           <span className="brand-text">CityPortal</span>
         </Link>
 
+        {/* Center Navigation Links */}
         <nav className="nav-links" aria-label="Main navigation">
-          <Link to="/" className="nav-link" style={{ color: "black" }}>
+          <Link to="/" className={getLinkClass("/")}>
             Home
           </Link>
 
@@ -157,44 +120,29 @@ export default function Navbar() {
             <>
               {role !== "admin" && user !== null && (
                 <>
-                  <Link
-                    to="/report"
-                    className="nav-link"
-                    style={{ color: "black" }}
-                  >
-                    Report
+                  <Link to="/report" className={getLinkClass("/report")}>
+                    Report Issue
                   </Link>
-                  <Link
-                    to="/track"
-                    className="nav-link"
-                    style={{ color: "black" }}
-                  >
+                  <Link to="/track" className={getLinkClass("/track")}>
                     Track
                   </Link>
                 </>
               )}
 
               {role === "admin" && user !== null && (
-                <Link
-                  to="/admin"
-                  className="nav-link admin"
-                  style={{ color: "black" }}
-                >
-                  Admin Dashboard
+                <Link to="/admin" className={`${getLinkClass("/admin")} admin`}>
+                  Admin Panel
                 </Link>
               )}
 
-              <Link
-                to="/all-reports"
-                className="nav-link"
-                style={{ color: "black" }}
-              >
+              <Link to="/all-reports" className={getLinkClass("/all-reports")}>
                 Community Dashboard
               </Link>
             </>
           )}
         </nav>
 
+        {/* Right Actions */}
         <div className="nav-actions">
           {!user ? (
             authInProgress ? (
@@ -202,9 +150,14 @@ export default function Navbar() {
                 Logging in...
               </button>
             ) : (
-              <Link to="/login" className="btn primary">
-                Login
-              </Link>
+              <div className="auth-buttons">
+                <Link to="/login" className={`btn ${pathname === "/login" ? "primary" : "ghost"}`}>
+                  Login
+                </Link>
+                <Link to="/register" className={`btn ${pathname === "/register" ? "primary" : "ghost"}`}>
+                  Register
+                </Link>
+              </div>
             )
           ) : (
             <>
