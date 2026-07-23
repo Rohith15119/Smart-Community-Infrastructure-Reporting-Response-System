@@ -16,48 +16,32 @@ export default function Navbar() {
     }
   });
 
-  const [logoOk, setLogoOk] = useState(true);
-
   const username = user?.username || user?.name || user?.email || "";
   const role = user && user.role ? user.role.toLowerCase() : "";
 
   useEffect(() => {
-    const parseStoredUser = (raw) => {
-      if (!raw) return null;
-      try {
-        const parsed = JSON.parse(raw);
-        if (parsed?.user) return parsed.user;
-        return parsed;
-      } catch {
-        return null;
-      }
-    };
-
     const refreshFromStorage = () => {
       try {
         const raw = localStorage.getItem("user");
-        const parsed = parseStoredUser(raw);
-        if (parsed && parsed.role)
-          parsed.role = parsed.role.toString().toLowerCase();
-        setUser(parsed);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          const u = parsed.user || parsed;
+          if (u && u.role) u.role = u.role.toString().toLowerCase();
+          setUser(u);
+        } else {
+          setUser(null);
+        }
       } catch {
         setUser(null);
       }
     };
 
-    const onStorage = (e) => {
-      if (e.key === "user" || e.key === null) {
-        refreshFromStorage();
-      }
-    };
-
-    window.addEventListener("storage", onStorage);
+    window.addEventListener("storage", refreshFromStorage);
     window.addEventListener("authChanged", refreshFromStorage);
-
     refreshFromStorage();
 
     return () => {
-      window.removeEventListener("storage", onStorage);
+      window.removeEventListener("storage", refreshFromStorage);
       window.removeEventListener("authChanged", refreshFromStorage);
     };
   }, []);
@@ -70,96 +54,64 @@ export default function Navbar() {
     navigate("/login");
   };
 
-  const LOGO_SRC = "/logo192.png";
-
   const getLinkClass = (path) => {
     return pathname === path ? "nav-link active" : "nav-link";
   };
 
   return (
     <header className="site-navbar">
-      <div className="container nav-inner">
+      <div className="nav-container">
         {/* Brand Logo */}
-        <Link to="/" className="brand" aria-label="CityPortal home">
-          {logoOk ? (
-            <img
-              src={LOGO_SRC}
-              alt="CityPortal logo"
-              className="brand-logo"
-              onError={() => setLogoOk(false)}
-            />
-          ) : (
-            <div className="brand-fallback" aria-hidden="true">
-              <span className="brand-initial">C</span>
-            </div>
-          )}
-          <div className="brand-titles">
-            <span className="brand-text">CityPortal</span>
-            <span className="brand-subtext">Smart Infrastructure</span>
-          </div>
+        <Link to="/" className="brand">
+          <span className="brand-icon">🏙️</span>
+          <span className="brand-title">CityPortal</span>
         </Link>
 
-        {/* Center Navigation Links */}
-        <nav className="nav-links" aria-label="Main navigation">
+        {/* Center Links */}
+        <nav className="nav-menu">
           <Link to="/" className={getLinkClass("/")}>
-            <span className="nav-icon">🏠</span> Home
+            Home
           </Link>
 
-          {/* Links for Logged-In Citizens */}
           {user && role !== "admin" && (
             <>
               <Link to="/report" className={getLinkClass("/report")}>
-                <span className="nav-icon">🚨</span> Report Issue
+                Report Issue
               </Link>
               <Link to="/track" className={getLinkClass("/track")}>
-                <span className="nav-icon">📍</span> Track Complaints
+                Track
               </Link>
             </>
           )}
 
-          {/* Links for Logged-In Admin */}
           {user && role === "admin" && (
-            <Link to="/admin" className={`${getLinkClass("/admin")} admin-link`}>
-              <span className="nav-icon">🛡️</span> Admin Panel
+            <Link to="/admin" className={getLinkClass("/admin")}>
+              Admin Panel
             </Link>
           )}
 
-          {/* Community Dashboard link - ALWAYS visible to everyone */}
           <Link to="/all-reports" className={getLinkClass("/all-reports")}>
-            <span className="nav-icon">📊</span> Community Dashboard
+            Community Dashboard
           </Link>
         </nav>
 
-        {/* Right Actions */}
-        <div className="nav-actions">
+        {/* Right Auth Buttons */}
+        <div className="nav-right">
           {!user ? (
-            <div className="auth-buttons">
-              <Link
-                to="/login"
-                className={`btn btn-login ${pathname === "/login" ? "active" : ""}`}
-              >
+            <div className="auth-btns">
+              <Link to="/login" className="btn btn-primary">
                 Login
               </Link>
-              <Link
-                to="/register"
-                className={`btn btn-register ${pathname === "/register" ? "active" : ""}`}
-              >
+              <Link to="/register" className="btn btn-secondary">
                 Register
               </Link>
             </div>
           ) : (
-            <div className="user-session">
-              <div className="user-chip" title={username || "User"}>
-                <span className="avatar">
-                  {(username || "U").charAt(0).toUpperCase()}
-                </span>
-                <div className="user-info">
-                  <div className="user-name">{username || "User"}</div>
-                  <div className="user-role-badge">{role || "citizen"}</div>
-                </div>
-              </div>
-
-              <button className="btn btn-logout" onClick={handleLogout}>
+            <div className="user-box">
+              <span className="user-name">
+                {username} ({role})
+              </span>
+              <button onClick={handleLogout} className="btn btn-logout">
                 Logout
               </button>
             </div>
