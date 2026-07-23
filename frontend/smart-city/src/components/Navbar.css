@@ -1,4 +1,4 @@
-/* src/components/Navbar.css - Simple Light Theme with Compact Buttons */
+/* src/components/Navbar.css - Clean Underline Active Link Navigation */
 
 .site-navbar {
   background-color: #ffffff;
@@ -6,7 +6,7 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
 }
 
 .nav-container {
@@ -43,28 +43,38 @@
 .nav-menu {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 24px;
 }
 
 .nav-link {
   text-decoration: none;
-  color: #475569;
+  color: #64748b;
   font-size: 14px;
   font-weight: 500;
-  padding: 6px 12px;
-  border-radius: 6px;
-  transition: background 0.15s ease, color 0.15s ease;
+  padding: 6px 0;
+  position: relative;
+  transition: color 0.15s ease;
 }
 
 .nav-link:hover {
   color: #0f172a;
-  background-color: #f1f5f9;
 }
 
+/* Clean Underline Indicator for Active Page */
 .nav-link.active {
   color: #2563eb;
-  background-color: #eff6ff;
   font-weight: 600;
+}
+
+.nav-link.active::after {
+  content: "";
+  position: absolute;
+  bottom: -18px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: #2563eb;
+  border-radius: 2px;
 }
 
 /* Right Section */
@@ -92,12 +102,12 @@
   font-weight: 600;
 }
 
-/* Compact Navbar-Specific Buttons (bypasses global App.css .btn height overrides) */
+/* Compact Navbar-Specific Buttons */
 .nav-btn {
   text-decoration: none;
   font-size: 13px;
   font-weight: 600;
-  padding: 6px 14px !important;
+  padding: 7px 16px !important;
   height: auto !important;
   min-height: initial !important;
   margin: 0 !important;
@@ -143,10 +153,9 @@
 /* Mobile responsive */
 @media (max-width: 768px) {
   .nav-menu {
-    gap: 8px;
+    gap: 14px;
   }
   .nav-link {
-    padding: 6px 8px;
     font-size: 13px;
   }
 }
