@@ -9,7 +9,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register.jsx";
 import "./App.css";
 import All_Reports from "./pages/All_Reports.jsx";
-import { AuthProvider } from "./auth/AuthContext"; // NEW
+import { AuthProvider } from "./auth/AuthContext";
 
 function App() {
   return (
@@ -18,7 +18,8 @@ function App() {
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
+          <Route path="/login" element={<Login isAdmin={false} />} />
+          <Route path="/admin-login" element={<Login isAdmin={true} />} />
           <Route path="/register" element={<Register />} />
           <Route path="/report" element={<Report />} />
           <Route path="/track" element={<Track />} />

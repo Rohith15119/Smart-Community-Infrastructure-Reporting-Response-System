@@ -1,24 +1,27 @@
-// src/pages/Login.jsx (minor edits to notify navbar + persist user)
+// src/pages/Login.jsx
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./Login.css";
-import { useAuth } from "../auth/AuthContext"; // NEW (kept)
+import { useAuth } from "../auth/AuthContext";
 import axios from "axios";
 import { API_BASE } from "../config";
 
 const API_BASE_CITIZEN = `${API_BASE}/city-api/citizen`;
 const api = axios.create({ baseURL: API_BASE_CITIZEN, withCredentials: true });
 
-const Login = () => {
+const Login = ({ isAdmin: isAdminProp }) => {
   const [emailOrUsername, setEmailOrUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [roleChoice, setRoleChoice] = useState("citizen");
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(null);
 
   const navigate = useNavigate();
-  const { login } = useAuth(); // USE CONTEXT if available
+  const location = useLocation();
+  const { login } = useAuth();
+
+  // Check if current route is admin login
+  const isAdminMode = isAdminProp || location.pathname === "/admin-login";
+  const roleChoice = isAdminMode ? "admin" : "citizen";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,25 +29,20 @@ const Login = () => {
     setLoading(true);
 
     try {
-      // indicate login is in progress so Navbar hides links
       try {
         localStorage.setItem("auth_in_progress", "1");
         window.dispatchEvent(new Event("authChanged"));
-      } catch (err) {
-        // ignore localStorage errors
-      }
+      } catch (err) {}
 
-      const endpoint = roleChoice === "admin" ? "/admin" : "/login";
+      const endpoint = isAdminMode ? "/admin" : "/login";
       const body = { username: emailOrUsername, password };
 
       const res = await api.post(endpoint, body);
 
-      // adapt to your backend response
       const returned = res.data?.UserData || res.data?.user || res.data;
       const token = res.data?.token || res.data?.accessToken || null;
 
       if (returned) {
-        // ----- Minimal change: normalize and persist user, notify BEFORE navigation -----
         const safeUser = {
           _id: returned._id || returned.id || null,
           username:
@@ -52,38 +50,25 @@ const Login = () => {
             returned.email ||
             returned.name ||
             emailOrUsername,
-          // ensure role is always a lowercase string: "admin" or "citizen"
-          role: (returned.role || roleChoice || "citizen")
-            .toString()
-            .toLowerCase(),
+          role: (returned.role || roleChoice).toString().toLowerCase(),
         };
 
         try {
-          // persist normalized user object (plain object)
           localStorage.setItem("user", JSON.stringify(safeUser));
           if (token) localStorage.setItem("token", token);
-        } catch (err) {
-          // ignore localStorage write errors
-        }
+        } catch (err) {}
 
-        // update AuthContext if present
         try {
           if (typeof login === "function") login(safeUser, token);
-        } catch (err) {
-          // ignore
-        }
+        } catch (err) {}
 
-        // remove in-progress flag and notify listeners BEFORE navigation
         try {
           localStorage.removeItem("auth_in_progress");
           window.dispatchEvent(new Event("authChanged"));
         } catch (err) {}
 
-        // now navigate (Navbar has already been notified)
         navigate(safeUser.role === "admin" ? "/admin" : "/report");
-        // -------------------------------------------------------------------------------
       } else {
-        // no user returned
         try {
           localStorage.removeItem("auth_in_progress");
           window.dispatchEvent(new Event("authChanged"));
@@ -91,7 +76,6 @@ const Login = () => {
         setError("Login failed: no user returned from server.");
       }
     } catch (err) {
-      // clear flag on error and notify navbar
       try {
         localStorage.removeItem("auth_in_progress");
         window.dispatchEvent(new Event("authChanged"));
@@ -108,7 +92,7 @@ const Login = () => {
   return (
     <div className="login-page">
       <div className="login-card">
-        <h2>Login</h2>
+        <h2>{isAdminMode ? "🛡️ Admin Login" : "Citizen Login"}</h2>
         {error && <p className="error-text">{error}</p>}
         <form onSubmit={handleSubmit}>
           <div>
@@ -116,6 +100,7 @@ const Login = () => {
             <input
               value={emailOrUsername}
               onChange={(e) => setEmailOrUsername(e.target.value)}
+              placeholder={isAdminMode ? "Enter admin username" : "Enter username"}
               required
             />
           </div>
@@ -126,23 +111,17 @@ const Login = () => {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter password"
               required
             />
           </div>
 
-          <div style={{ marginTop: 12 }}>
-            <label>Login as:</label>
-            <select
-              value={roleChoice}
-              onChange={(e) => setRoleChoice(e.target.value)}
-            >
-              <option value="citizen">Citizen</option>
-              <option value="admin">Admin</option>
-            </select>
-          </div>
-
-          <button type="submit" disabled={loading}>
-            {loading ? "Logging in..." : "Login"}
+          <button type="submit" disabled={loading} style={{ marginTop: 16 }}>
+            {loading
+              ? "Logging in..."
+              : isAdminMode
+              ? "Login to Admin Portal"
+              : "Login"}
           </button>
         </form>
       </div>
